@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop</title>
+    <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+</head>
+<body>
+    <section id="header">
+
+        <a href=""><img src="./Photos/Logo.png" height="70px" width="70px" ></a>
+
+        <div>
+            <ul id="navbar" type="none">
+                <!-- <li><input class="search" type="text" placeholder="Search.." name="search">
+                    <button class="search1" type="submit"><i class="fa fa-search"></i></button></li> -->
+                <li class="content"><a href="./index.html"><b>Home</b></a></li>
+                <li class="content"><a  href="./shop.html"><b>Shop</b></a></li>
+                <li class="content"><a href="./blog.html"><b>Blog</b></a></li>
+                <li class="content"><a href="#contact"><b>About</b></a></li>
+                <li class="content"><a href="#contact"><b>Contact</b></a></li>
+                <li class="content"><a href=""><i class="fa-solid fa-user"></i></a></li>
+                <li class="content"><a href=""><i class="fa-solid fa-heart"></i></a></li>
+                <li class="content"><a href="./cart.html" id="lg-bag"><i class="fa-solid fa-cart-shopping"></i></a></li>
+                <i id="close" class="fa-solid fa-xmark"></i>
+    
+            </ul>
+        </div>
+        <div id="mobile">
+            <div>
+                <i id="bar" class="fas fa-outdent"></i>
+                <a href="" ><i class="fa-solid fa-bag-shopping"></i></a>
+            </div>
+        </div>
+    </section>
+    
+            
+
+   <div id="mobile">
+        <a href="cart.html"
+          ><i class="fa fa-shopping-bag" aria-hidden="true"></i
+        ></a>
+        <i id="bar" class="fa fa-bars" aria-hidden="true"></i>
+      </div>
+    </section>
+
+    <section id="page-header" class="about-header">
+      <h2>CART   <i class="fa-solid fa-cart-shopping"></i></h2><br>
+      <p>Enter your Coupon Code : <input type="text" name="" id=""> </p>
+      <a href="#" class="to-top">
+        <i class="fas fa-chevron-up"></i>
+      </a>
+    </section>
+
+    <!-- <section id="contact-details" class="section-p1">
+        <div class="details">
+            <h2>Your Cart is Empty</h2>
+    </section> -->
+
+    <!-- cart items details-->
+
+
+
+<div class="small-container">
+    <table>
+      <tr>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+      </tr>
+      <!-- Cart items will be inserted here by JS -->
+    </table>
+
+    <div class="total-price">
+      <table>
+        <!-- Total prices will be inserted here -->
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function loadCart() {
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const table = document.querySelector('table');
+
+      // Remove old rows except the header (first row)
+      let rows = table.querySelectorAll('tr');
+      rows.forEach((row, i) => {
+        if (i > 0) row.remove();
+      });
+
+      let subtotal = 0;
+
+      cart.forEach((product) => {
+        const tr = document.createElement('tr');
+
+        // Product cell
+        const tdProduct = document.createElement('td');
+        tdProduct.innerHTML = `
+          <div class="cart-info">
+            <img src="${product.img}" alt="${product.name}" />
+            <div>
+              <p>${product.name}</p>
+              <small>Price: $${product.price.toFixed(2)}</small><br />
+              <a href="#" class="remove">Remove</a>
+            </div>
+          </div>
+        `;
+
+        // Quantity cell
+        const tdQty = document.createElement('td');
+        const inputQty = document.createElement('input');
+        inputQty.type = 'number';
+        inputQty.value = product.quantity;
+        inputQty.min = 1;
+        inputQty.addEventListener('change', (e) => {
+          let newQty = parseInt(e.target.value);
+          if (newQty < 1) newQty = 1;
+          e.target.value = newQty;
+          updateQuantity(product.name, newQty);
+        });
+        tdQty.appendChild(inputQty);
+
+        // Subtotal cell
+        const tdSubtotal = document.createElement('td');
+        let productTotal = product.price * product.quantity;
+        tdSubtotal.textContent = `$${productTotal.toFixed(2)}`;
+
+        tr.appendChild(tdProduct);
+        tr.appendChild(tdQty);
+        tr.appendChild(tdSubtotal);
+
+        table.appendChild(tr);
+
+        subtotal += productTotal;
+      });
+
+      // Update totals
+      const tax = subtotal * 0.15; // 15% tax
+      const total = subtotal + tax;
+
+      document.querySelector('.total-price table').innerHTML = `
+        <tr><td>Subtotal</td><td>$${subtotal.toFixed(2)}</td></tr>
+        <tr><td>Tax (15%)</td><td>$${tax.toFixed(2)}</td></tr>
+        <tr><td><strong>Total</strong></td><td><strong>$${total.toFixed(2)}</strong></td></tr>
+      `;
+
+      // Remove item event
+      document.querySelectorAll('.remove').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const productName = e.target.closest('div.cart-info').querySelector('p').textContent;
+          removeProduct(productName);
+        });
+      });
+    }
+
+    function updateQuantity(name, quantity) {
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      let product = cart.find((item) => item.name === name);
+      if (product) {
+        product.quantity = quantity;
+        localStorage.setItem('cart', JSON.stringify(cart));
+        loadCart();
+      }
+    }
+
+    function removeProduct(name) {
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      cart = cart.filter((item) => item.name !== name);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      loadCart();
+    }
+
+    window.onload = loadCart;
+  </script>
+
+    
+    <!-- <div class="small-container">
+      <table>
+        <tr>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Subtotal</th>
+        </tr>
+        <tr>
+          <td>
+            <div class="cart-info">
+              <img src="./Photos/Shirts/shirt1/tshirt1.png" alt="Tshirt" />
+              <div>
+                <p>Orange Printed Tshirt</p>
+                <small>Price: $78.00</small>
+                <br />
+                <a href="#">Remove</a>
+              </div>
+            </div>
+          </td>
+          <td><input type="number" value="1" /></td>
+          <td>$78.00</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="cart-info">
+              <img src="./Photos/Shirts/shirt9/tshirt91.png" alt="Tshirt" />
+              <div>
+                <p>Orange Printed Tshirt</p>
+                <small>Price: $78.00</small>
+                <br />
+                <a href="#">Remove</a>
+              </div>
+            </div>
+          </td>
+          <td><input type="number" value="1" /></td>
+          <td>$78.00</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="cart-info">
+              <img src="./Photos/Shirts/shirt8/tshirt82.png" alt="Tshirt" />
+              <div>
+                <p>Orange Printed Tshirt</p>
+                <small>Price: $78.00</small>
+                <br />
+                <a href="#">Remove</a>
+              </div>
+            </div>
+          </td>
+          <td><input type="number" value="1" /></td>
+          <td>$78.00</td>
+        </tr>
+      </table>
+
+      <div class="total-price">
+        <table>
+          <tr>
+            <td>Subtotal</td>
+            <td>$234.00</td>
+          </tr>
+          <tr>
+            <td>Tax</td>
+            <td>$35.00</td>
+          </tr>
+          <tr>
+            <td>Total</td>
+            <td>$269.00</td>
+          </tr>
+        </table>
+      </div>
+    </div> -->
+
+    <section id="form-details">
+      <form action="">
+        <span>Leave a Message</span>
+        <h2>We love to hear from you</h2>
+        <input type="text" placeholder="Enter your Name" required />
+        <input type="email" placeholder="Enter your Email" required />
+        <input type="text" placeholder="Enter your Subject" />
+        <textarea placeholder="Your Message" rows="5" required></textarea>
+        <button class="normal">Submit</button>
+      </form>
+    
+      <div class="people">
+        <div class="col1">
+          <img src="./Photos/cart/c1.png" alt="Person 1">
+          <p>
+            <span>Abhishek S</span><br />
+            Senior Marketing Manager<br />
+            📞 +91 8861022187<br />
+            📧 abhisheks123@gmail.com
+          </p>
+        </div>
+        <div class="col1">
+          <img src="./Photos/cart/c2.png" alt="Person 2">
+          <p>
+            <span>Harish Sharma</span><br />
+            Customer Relations Lead<br />
+            📞 +91 9876543210<br />
+            📧 harishsharma987@gmail.com
+          </p>
+        </div>
+        <div class="col1">
+          <img src="./Photos/cart/c3.png" alt="Person 3">
+          <p>
+            <span>Harini B H</span><br />
+            Technical Support Head<br />
+            📞 +91 8050590609<br />
+            📧 harinibh08@gmail.com
+          </p>
+        </div>
+      </div>
+    </section>
+    
+
+
+    <!-- <section id="form-details">
+      <form action="">
+        <span>Leave a Message</span>
+        <h2>We love to hear from you</h2>
+        <input type="text" placeholder="Enter your name" />
+        <input type="text" placeholder="Enter your Email" />
+        <input type="text" placeholder="Enter your Subjext" />
+        <textarea placeholder="Your Message" ></textarea>
+        <button class="normal">Submit</button>
+      </form>
+
+      <div class="people">
+        <div>
+          <div class="col">
+            <img src="./Photos/cart/c1.png" alt="" height="120px" width="120px">
+          <p>
+            <span>John Doe</span> Senior Marketing Manager <br />
+            📞 +91 1234567890<br />
+            📧 contact@example.com
+          </p>
+        </div>
+        <div>
+          <div class="col">
+            <img src="./Photos/cart/c2.png" alt="" height="120px" width="120px">
+          <p>
+            <span>John Doe</span> Senior Marketing Manager <br />
+            📞 +91 1234567890<br />
+        📧 contact@example.com
+          </p>
+        </div>
+        <div>
+          <div class="col">
+            <img src="./Photos/cart/c3.png" alt="" height="120px" width="120px">
+          <p>
+            <span>Jean Doe</span> Senior Marketing Manager <br />
+            📞 +91 1234567890<br />
+            📧 contact@example.com
+          </p>
+        </div>
+      </div>
+    </section> -->
+
+    <section id="newsletter" class="section-p1">
+        <div class="newstext">
+            <h2>Subscribe for Updates</h2>
+            <p>Stay informed with the latest arrivals and <span>exclusive offers!</span></p>
+        </div>
+        <div class="form">
+            <input type="text" placeholder="Enter your email address">
+            <button>Subscribe</button>
+        </div>
+    </section>
+
+    <footer class="section-p1">
+        <div class="col">
+            <img src="./logo/Kiran_S_B.jpeg" alt="" height="120px" width="120px">
+            <h4 class="cls">Contact</h4>
+            <p>
+                <strong>Address :</strong> <br>31st Cross 2nd Block Rajajinagar, Bangalore  
+            </p>
+            <p>
+                <strong>Phone :</strong><br> (+91) 6363946992 / 8150945024
+            </p>
+            <div>
+                <h4 class="cls">Follow us</h4>
+                <div class="logoo">
+                    <i class="fa-brands fa-facebook"></i>
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <i class="fa-brands fa-twitter"></i>
+                    <i class="fa-brands fa-youtube"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <h4>About</h4>
+            <a href="">Delivery Information</a>
+            <a href="">Privacy Policy</a>
+            <a href="">Terms & Condition</a>
+            <a href="">Contact Us</a>
+
+        </div>
+        <div class="col install">
+            <h4>My Account</h4>
+            <a href="">Sign-in</a>
+            <a href="">View Cart</a>
+            <a href="">Track My Order</a>
+            <a href="">Help</a>
+
+        </div>
+        <div class="col install">
+            <h4>Install</h4>
+            <p>From App store or Google Play Store</p>
+            <div class="row">
+                <img class="play1" src="./logo/gooo.webp" alt="" height="80px" width="100px">
+                <img class="play2" src="./logo/App_Store_(iOS)-Badge-Logo.wine.png" alt="" height="120px" width="300px">
+            </div>
+            <p>Secure Payment Gateway</p>
+            <img src="./logo/digitalterminal_import_uploads_news_1617357635s_Digital payments.avif" alt="" height="100px" width="300px">
+        </div>
+        <div class="copy-right">
+            <p>© 2025, Spakraft - Shopping is Fun </p>
+        </div>
+    </footer>
+   
+
+
+    
+
+</body>
+</html>
